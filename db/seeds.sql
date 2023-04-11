@@ -35,3 +35,31 @@ VALUES
 
 
     -- Sample seeds (will be deleted later) --
+    
+-- Keeping for now--
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+VALUES 
+    -- Sales department
+    ('John', 'Doe', 1, NULL),
+    ('Jane', 'Smith', 2, 1),
+    ('Bob', 'Johnson', 3, 1),
+
+    -- Engineering department
+    ('Mark', 'Jones', 4, NULL),
+    ('Emily', 'Davis', 5, 4),
+    ('Chris', 'Wilson', 6, 4),
+
+    -- Finance department
+    ('Tom', 'Brown', 7, NULL),
+    ('Kelly', 'Taylor', 8, 7),
+    ('Mike', 'Clark', 9, 7),
+
+    -- Software department
+    ('Kevin', 'Lee', 10, NULL),
+    ('Sophie', 'Garcia', 11, 10),
+    ('Ethan', 'Kim', 12, 10),
+
+    -- Legal department
+    ('Samantha', 'Miller', 13, NULL),
+    ('Alex', 'Gomez', 14, 13),
+    ('Maria', 'Hernandez', 15, 13);
