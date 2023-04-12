@@ -158,8 +158,9 @@ function addDepartment() {
                 }
                 else {
                     console.log(`Added ${response.dptName} to the database.`);
+                    
                 }
-                mainMenu();
+                 mainMenu();
             })
         })
 
@@ -168,7 +169,7 @@ function addDepartment() {
 function addRole() {
 
     // Need to include this to select all available departments
-    db.query('SELECT name FROM department;', (err, result) => {
+    db.query('SELECT id, name FROM department;', (err, result) => {
         if (err) {
             console.log(err.message);
         }
@@ -177,7 +178,7 @@ function addRole() {
             const departmentChoices = result.map(department => {
                 return {
                     name: department.name,
-                    value: department.name
+                    value: department.id
                 }
             });
 
@@ -204,15 +205,13 @@ function addRole() {
                 }
             ])
                 .then((response) => {
-                    // Use the selected department name to get the department id
-                    const departmentId = result.find(department => department.name === response.department).id;
-
+                    
                     // Insert new role into the database
                     db.query('INSERT INTO role SET ?',
                         {
                             title: response.title,
                             salary: response.salary,
-                            department_id: departmentId
+                            department_id: response.department
                         },
                         (err, result) => {
                             if (err) {
@@ -230,7 +229,18 @@ function addRole() {
 }
 
 
-
+function addEmployee() {
+    const query = `
+    SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+    r.title AS employee_title,
+    d.name AS department_name,
+    r.salary AS employee_salary,
+    CONCAT(m.first_name,' ', m.last_name) AS manager_name
+    FROM employee e
+    LEFT JOIN role r ON e.role_id = r.id
+    LEFT JOIN department d ON r.department_id = d.id
+    LEFT JOIN employee m ON e.manager_id = m.id;`;
+}
 
 
 //starts the program
