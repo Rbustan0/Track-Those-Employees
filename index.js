@@ -85,10 +85,20 @@ function viewAllDepartments() {
             console.log(err.message);
             return;
         }
-        console.table(rows);
+
+        // Construct string output
+        let output = "ID\t| Department\n";
+        output += "-".repeat(20) + "\n"; // divider line
+
+        rows.forEach((row) => {
+            output += `${row.id}\t| ${row.name}\n`;
+        });
+
+        console.log(output);
         mainMenu();
-    })
+    });
 }
+
 
 function viewAllRoles() {
     db.query(`
@@ -100,9 +110,24 @@ function viewAllRoles() {
             console.log(err.message);
             return;
         }
-        console.table(rows);
+
+        // Need this to be a string literal to avoid working with ugly strings
+
+        let output = "ID  | Title                | Department      | Salary\n";
+        output += "-".repeat(60) + "\n";
+
+        rows.forEach((row) => {
+            const id = row.id.toString().padStart(3, " ");
+            const title = row.title.padEnd(20, " ");
+            const department = row.department_name.padEnd(15, " ");
+            const salary = row.salary.toString().padStart(7, " ");
+
+            output += `${id} | ${title} | ${department} | ${salary}\n`;
+        });
+
+        console.log(output);
         mainMenu();
-    })
+    });
 }
 
 
@@ -222,3 +247,10 @@ function addRole() {
         }
     });
 }
+
+
+
+
+
+//starts the program
+mainMenu();
