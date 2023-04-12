@@ -64,4 +64,4 @@ VALUES
     ('Alex', 'Gomez', 14, 13),
     ('Maria', 'Hernandez', 15, 13);
 
-    UPDATE employee SET manager_id = id WHERE manager_id IS NULL;
+    -- UPDATE employee SET manager_id = id WHERE manager_id IS NULL;
