@@ -68,7 +68,7 @@ function mainMenu() {
                     break;
                 case 'Add an Employee':
                     // Add an Employee function
-                    //addEmployee();
+                    addEmployee();
                     break;
                 case 'Quit':
                     db.end();
@@ -231,6 +231,11 @@ function addRole() {
 
 function addEmployee() {
 
+    // predefined lists for roles and employees
+    let roleChoices = [];
+    let employeeChoices = [];
+
+    
     // Select and grab the roles for inquirer prompt
     db.query('SELECT * FROM role', (err, result) => {
         if (err) {
@@ -239,7 +244,7 @@ function addEmployee() {
         }
 
         // Maps our results into the array we want for later
-        const roleChoices = result.map(res => {
+         roleChoices = result.map(res => {
             return {
                 name: res.title,
                 value: res.id
@@ -248,16 +253,16 @@ function addEmployee() {
     });
 
     // Going to do something similar to roles but for employees now
-    db.query('SELECT * FROM employee', (err, result) => {
+    db.query('SELECT * FROM employee WHERE employee.manager_id IS NULL', (err, result) => {
         if (err) {
             console.log(err.message);
             return;
         }
 
         // Maps our results into the array we want for later
-        const employeeChoices = result.map(res => {
+         employeeChoices = result.map(res => {
             return {
-                name: res.first_name +'' + res.last_name,
+                name: res.first_name + ' ' + res.last_name,
                 value: res.id
             };
         });
@@ -315,6 +320,52 @@ function addEmployee() {
     
     });
 
+}
+
+
+
+// UPDATE FUNCTIONS
+
+function updateDepartment() {
+    db.query('SELECT * FROM department', (err, result) => {
+        
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+        
+        const departmentChoices = result.map(department => {
+            return {
+                name: department.name,
+                value: department.id
+            }
+        });
+    
+        inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Which department would you like to update?',
+                choices: departmentChoices
+            },
+            {
+                type: 'input',
+                name: 'newDepartment',
+                message: 'What is the new department name?'
+            }
+        ])
+        .then((response) => {
+            db.query('UPDATE department SET name =? WHERE id =?', [response.newDepartment, response.department.id], (err, result) => {
+                if (err) {
+                    console.log(err.message);
+                    return;
+                }
+                console.log(`Updated ${response.department.name} to ${response.newDepartment}`);
+                mainMenu();
+            });
+        });
+    });
 }
 
 
