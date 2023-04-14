@@ -36,7 +36,7 @@ function mainMenu() {
             switch (res.action) {
                 case 'Update Department':
                     // Update Department function
-                    //updateDepartment();
+                    updateDepartment();
                     break;
                 case 'View All Departments':
                     // View All Departments function
@@ -63,7 +63,7 @@ function mainMenu() {
                     //updateEmployee();
                     break;
                 case 'View all Employees':
-                    // View all Employees function
+                    // TODO: View all Employees function
                     viewAllEmployees();
                     break;
                 case 'Add an Employee':
@@ -356,7 +356,7 @@ function updateDepartment() {
             }
         ])
         .then((response) => {
-            db.query('UPDATE department SET name =? WHERE id =?', [response.newDepartment, response.department.id], (err, result) => {
+            db.query('UPDATE department SET name =? WHERE id =?', [response.newDepartment, response.department], (err, result) => {
                 if (err) {
                     console.log(err.message);
                     return;
