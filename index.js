@@ -235,7 +235,7 @@ function addEmployee() {
     let roleChoices = [];
     let employeeChoices = [];
 
-    
+
     // Select and grab the roles for inquirer prompt
     db.query('SELECT * FROM role', (err, result) => {
         if (err) {
@@ -244,7 +244,7 @@ function addEmployee() {
         }
 
         // Maps our results into the array we want for later
-         roleChoices = result.map(res => {
+        roleChoices = result.map(res => {
             return {
                 name: res.title,
                 value: res.id
@@ -260,7 +260,7 @@ function addEmployee() {
         }
 
         // Maps our results into the array we want for later
-         employeeChoices = result.map(res => {
+        employeeChoices = result.map(res => {
             return {
                 name: res.first_name + ' ' + res.last_name,
                 value: res.id
@@ -272,9 +272,9 @@ function addEmployee() {
             name: 'None',
             value: null
         });
-    
-    // Going to nest the rest of the code in here to avoid duplication of code
-    
+
+        // Going to nest the rest of the code in here to avoid duplication of code
+
         inquirer
             .prompt([
                 {
@@ -295,14 +295,14 @@ function addEmployee() {
                 },
                 {
                     type: 'list',
-                    name:'managerId',
+                    name: 'managerId',
                     message: 'Who is the employee\'s manager?',
                     choices: employeeChoices
                 }
             ])
             .then((response) => {
                 // Insert new employee into the database
-                db.query('INSERT INTO employee SET ?',{
+                db.query('INSERT INTO employee SET ?', {
                     first_name: response.firstName,
                     last_name: response.lastName,
                     role_id: response.roleId,
@@ -316,8 +316,8 @@ function addEmployee() {
                 });
                 mainMenu();
             })
-    
-    
+
+
     });
 
 }
@@ -328,52 +328,49 @@ function addEmployee() {
 
 function updateDepartment() {
     db.query('SELECT * FROM department', (err, result) => {
-        
+
         if (err) {
             console.log(err.message);
             return;
         }
-        
+
         const departmentChoices = result.map(department => {
             return {
                 name: department.name,
                 value: department.id
             }
         });
-    
+
         inquirer
-        .prompt([
-            {
-                type: 'list',
-                name: 'department',
-                message: 'Which department would you like to update?',
-                choices: departmentChoices
-            },
-            {
-                type: 'input',
-                name: 'newDepartment',
-                message: 'What is the new department name?'
-            }
-        ])
-        .then((response) => {
-            db.query('UPDATE department SET name =? WHERE id =?', [response.newDepartment, response.department], (err, result) => {
-                if (err) {
-                    console.log(err.message);
-                    return;
+            .prompt([
+                {
+                    type: 'list',
+                    name: 'department',
+                    message: 'Which department would you like to update?',
+                    choices: departmentChoices
+                },
+                {
+                    type: 'input',
+                    name: 'newDepartment',
+                    message: 'What is the new department name?'
                 }
-                console.log(`Updated ${response.department.name} to ${response.newDepartment}`);
-                mainMenu();
+            ])
+            .then((response) => {
+                db.query('UPDATE department SET name =? WHERE id =?', [response.newDepartment, response.department], (err, result) => {
+                    if (err) {
+                        console.log(err.message);
+                        return;
+                    }
+                    console.log(`Updated ${response.department.name} to ${response.newDepartment}`);
+                    mainMenu();
+                });
             });
-        });
     });
 }
 
 
 function updateJobRole() {
-    
-    
     db.query('SELECT * FROM role', (err, result) => {
-        
         if (err) {
             console.log(err.message);
             return;
@@ -381,7 +378,7 @@ function updateJobRole() {
 
         const roleChoices = result.map(role => {
             return {
-                name: role.title,
+                name: `${role.title} (${role.salary})`,
                 value: role.id,
                 department_id: role.department_id
             }
@@ -397,8 +394,8 @@ function updateJobRole() {
                 },
                 {
                     type: 'input',
-                    name: 'newRole',
-                    message: 'What is the new role name?'
+                    name: 'newTitle',
+                    message: 'What is the new role name? Note that this job must match within the current department it belongs to.'
                 },
                 {
                     type: 'input',
@@ -407,28 +404,19 @@ function updateJobRole() {
                 }
             ])
             .then((response) => {
-                // Let us make sure that updated role belongs within the same department
-                const updatedRole = result.find(role => role.value === response.role);
-                if (updatedRole.department_id!== response.newRole.department.id) {
-                    console.log(`Error: ${response.newTitle} cannot be updated to department ${response.department.name}. Please select a job that belongs to this department.`);
-                    mainMenu();
-                    // Return statement to avoid code below being executed
-                    return;
-                }
-
+                // Ensure that the updated role belongs to the same department
+                const updatedRole = roleChoices.find(role => role.value === response.role);
                 db.query('UPDATE role SET title =?, salary =? WHERE id =?', [response.newTitle, response.newSalary, response.role], (err, result) => {
                     if (err) {
                         console.log(err.message);
                         return;
                     }
-                    console.log(`Updated ${response.newTitle} to ${response.newSalary}`);
+                    console.log(`Updated ${updatedRole.name} to ${response.newTitle} with a salary of ${response.newSalary}`);
                     mainMenu();
                 });
-
             });
     });
 }
-
 
 //starts the program
 mainMenu();
