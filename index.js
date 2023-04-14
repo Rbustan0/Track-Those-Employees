@@ -48,7 +48,7 @@ function mainMenu() {
                     break;
                 case 'Update a Job Role':
                     // Update a Job Role function
-                    //updateJobRole();
+                    updateJobRole();
                     break;
                 case 'View All Roles':
                     // View All Roles function
@@ -59,11 +59,11 @@ function mainMenu() {
                     addRole();
                     break;
                 case 'Update an Employee':
-                    // Update an Employee function
+                    // TODO: Update an Employee function
                     //updateEmployee();
                     break;
                 case 'View all Employees':
-                    // TODO: View all Employees function
+                    // View all Employees function
                     viewAllEmployees();
                     break;
                 case 'Add an Employee':
@@ -365,6 +365,67 @@ function updateDepartment() {
                 mainMenu();
             });
         });
+    });
+}
+
+
+function updateJobRole() {
+    
+    
+    db.query('SELECT * FROM role', (err, result) => {
+        
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+
+        const roleChoices = result.map(role => {
+            return {
+                name: role.title,
+                value: role.id,
+                department_id: role.department_id
+            }
+        });
+
+        inquirer
+            .prompt([
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'Which role would you like to update?',
+                    choices: roleChoices
+                },
+                {
+                    type: 'input',
+                    name: 'newRole',
+                    message: 'What is the new role name?'
+                },
+                {
+                    type: 'input',
+                    name: 'newSalary',
+                    message: 'What is the new salary for this role?'
+                }
+            ])
+            .then((response) => {
+                // Let us make sure that updated role belongs within the same department
+                const updatedRole = result.find(role => role.value === response.role);
+                if (updatedRole.department_id!== response.newRole.department.id) {
+                    console.log(`Error: ${response.newTitle} cannot be updated to department ${response.department.name}. Please select a job that belongs to this department.`);
+                    mainMenu();
+                    // Return statement to avoid code below being executed
+                    return;
+                }
+
+                db.query('UPDATE role SET title =?, salary =? WHERE id =?', [response.newTitle, response.newSalary, response.role], (err, result) => {
+                    if (err) {
+                        console.log(err.message);
+                        return;
+                    }
+                    console.log(`Updated ${response.newTitle} to ${response.newSalary}`);
+                    mainMenu();
+                });
+
+            });
     });
 }
 
