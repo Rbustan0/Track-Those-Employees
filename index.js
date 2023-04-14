@@ -26,7 +26,7 @@ function mainMenu() {
                 'Update a Job Role',
                 'View All Roles',
                 'Add a Role',
-                'Update an Employee',
+                'Update an Employee\'s Job Role',
                 'View all Employees',
                 'Add an Employee',
                 'Quit'
@@ -58,9 +58,9 @@ function mainMenu() {
                     // Add a Role function
                     addRole();
                     break;
-                case 'Update an Employee':
-                    // TODO: Update an Employee function
-                    //updateEmployee();
+                case 'Update an Employee\'s Job Role':
+                    //Update an Employee function
+                    updateEmployee();
                     break;
                 case 'View all Employees':
                     // View all Employees function
@@ -417,6 +417,74 @@ function updateJobRole() {
             });
     });
 }
+
+
+
+function updateEmployee() {
+
+    db.query('SELECT * FROM employee', (err, result) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+
+        const employeeChoices = result.map(employee => {
+            return {
+                name: `${employee.first_name} ${employee.last_name}`,
+                value: employee.id,
+                role_id: employee.role_id
+            }
+        });
+
+        // nested query for the callback function
+        db.query('SELECT * FROM role', (err, result) => {
+            if (err) {
+                console.log(err.message);
+                return;
+            }
+            const roleChoices = result.map(role => {
+                return {
+                    name: `${role.title} (${role.salary})`,
+                    value: role.id,
+                    department_id: role.department_id,
+                    title: role.title,
+                    salary: role.salary
+                }
+            });
+
+            inquirer
+                .prompt([
+                    {
+                        type: 'list',
+                        name: 'employee',
+                        message: 'Which employee would you like to update?',
+                        choices: employeeChoices
+                    },
+                    {
+                        type: 'list',
+                        name: 'role',
+                        message: 'What is the new role for this employee?',
+                        choices: roleChoices
+                    },
+
+                ])
+                .then((response) => {
+                    const updatedEmployee = employeeChoices.find(employee => employee.value === response.employee);
+                    const updatedRole = roleChoices.find(role => role.value === response.role);
+
+                    db.query('UPDATE employee SET role_id =? WHERE id =?', [response.role, response.employee], (err, result) => {
+                        if (err) {
+                            console.log(err.message);
+                            return;
+                        }
+                        console.log(`Updated ${updatedEmployee.name} to ${updatedRole.title} with a salary of ${updatedRole.salary}`);
+                        mainMenu();
+                    });
+                });
+        });
+    });
+}
+
 
 //starts the program
 mainMenu();
