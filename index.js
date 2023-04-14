@@ -158,9 +158,9 @@ function addDepartment() {
                 }
                 else {
                     console.log(`Added ${response.dptName} to the database.`);
-                    
+
                 }
-                 mainMenu();
+                mainMenu();
             })
         })
 
@@ -205,7 +205,7 @@ function addRole() {
                 }
             ])
                 .then((response) => {
-                    
+
                     // Insert new role into the database
                     db.query('INSERT INTO role SET ?',
                         {
@@ -230,16 +230,91 @@ function addRole() {
 
 
 function addEmployee() {
-    const query = `
-    SELECT CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
-    r.title AS employee_title,
-    d.name AS department_name,
-    r.salary AS employee_salary,
-    CONCAT(m.first_name,' ', m.last_name) AS manager_name
-    FROM employee e
-    LEFT JOIN role r ON e.role_id = r.id
-    LEFT JOIN department d ON r.department_id = d.id
-    LEFT JOIN employee m ON e.manager_id = m.id;`;
+
+    // Select and grab the roles for inquirer prompt
+    db.query('SELECT * FROM role', (err, result) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+
+        // Maps our results into the array we want for later
+        const roleChoices = result.map(res => {
+            return {
+                name: res.title,
+                value: res.id
+            };
+        });
+    });
+
+    // Going to do something similar to roles but for employees now
+    db.query('SELECT * FROM employee', (err, result) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+
+        // Maps our results into the array we want for later
+        const employeeChoices = result.map(res => {
+            return {
+                name: res.first_name +'' + res.last_name,
+                value: res.id
+            };
+        });
+
+        // Add a none option for the manager
+        employeeChoices.push({
+            name: 'None',
+            value: null
+        });
+    
+    // Going to nest the rest of the code in here to avoid duplication of code
+    
+        inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    name: 'firstName',
+                    message: 'What is the employee\'s first name?'
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: 'What is the employee\'s last name?'
+                },
+                {
+                    type: 'list',
+                    name: 'roleId',
+                    message: 'What is the employee\'s role?',
+                    choices: roleChoices
+                },
+                {
+                    type: 'list',
+                    name:'managerId',
+                    message: 'Who is the employee\'s manager?',
+                    choices: employeeChoices
+                }
+            ])
+            .then((response) => {
+                // Insert new employee into the database
+                db.query('INSERT INTO employee SET ?',{
+                    first_name: response.firstName,
+                    last_name: response.lastName,
+                    role_id: response.roleId,
+                    manager_id: response.managerId || null
+                }, (err, result) => {
+                    if (err) {
+                        console.log(err.message);
+                        return;
+                    }
+                    console.log(`Added ${response.firstName} ${response.lastName} to the database.`);
+                });
+                mainMenu();
+            })
+    
+    
+    });
+
 }
 
 
